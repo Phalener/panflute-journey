@@ -68,7 +68,7 @@ export function Home() {
                     {currentAlbum.year ? `${currentAlbum.year} EDITION` : "ANDES ARCHIVE"}
                   </span>
                   <span className="retro-stamp__text">
-                    {currentAlbum.isFeatured ? "★ FEATURED DISC ★" : "ORIGINAL PANPIPES RECORDING"}
+                    {currentAlbum.isFeatured ? "★ FEATURED ALBUM ★" : "ORIGINAL PANPIPES RECORDING"}
                   </span>
                 </div>
 
@@ -106,7 +106,7 @@ export function Home() {
                     </button>
                   )}
                   <Link to={`/albums/${currentAlbum.id}`} className="btn btn--metal-glossy">
-                    <span>💿 View CD Inlay & Tracks</span>
+                    <span>💿 View Album & Tracks</span>
                   </Link>
                 </div>
 
@@ -119,7 +119,7 @@ export function Home() {
                       title="Previous Album"
                       aria-label="Previous Album"
                     >
-                      ❮ PREV DISC
+                      ❮ PREV
                     </button>
                     <div className="hero-slider-indicators">
                       {albums.map((alb, idx) => (
@@ -138,10 +138,10 @@ export function Home() {
                       title="Next Album"
                       aria-label="Next Album"
                     >
-                      NEXT DISC ❯
+                      NEXT ❯
                     </button>
                     <span className="hero-slider-counter">
-                      DISC {String(activeIndex + 1).padStart(2, "0")} / {String(totalAlbums).padStart(2, "0")}
+                      ALBUM {String(activeIndex + 1).padStart(2, "0")} / {String(totalAlbums).padStart(2, "0")}
                     </span>
                   </div>
                 )}
@@ -203,11 +203,6 @@ export function Home() {
                           className="jewel-case__cover-img"
                         />
                         <div className="jewel-case__gloss"></div>
-                        <div className="jewel-case__cd-badge">
-                          <span className="cd-badge__text">COMPACT</span>
-                          <span className="cd-badge__disc">disc</span>
-                          <span className="cd-badge__sub">DIGITAL AUDIO</span>
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -243,13 +238,13 @@ export function Home() {
           <div className="section-head retro-section-head">
             <div className="section-head__title-wrap">
               <span className="retro-kicker">DIGITAL AUDIO RECORDINGS</span>
-              <h2>{search ? `Search Results: “${search}”` : "CD Discography & Albums"}</h2>
+              <h2>{search ? `Search Results: “${search}”` : "Discography & Albums"}</h2>
             </div>
             {!loading && (
               <div className="retro-count-box">
                 <span className="retro-count-label">CATALOG COUNT</span>
                 <span className="retro-count-num">
-                  {String(albums.length).padStart(2, "0")} DISCS
+                  {String(albums.length).padStart(2, "0")} ALBUMS
                 </span>
               </div>
             )}
