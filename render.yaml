@@ -15,10 +15,7 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: panflute-journey-backend
-          property: host
+        value: https://panflute-journey-backend.onrender.com
 
   # -------------------------------------------------------------
   # 2. Backend: Node.js API Web Service
@@ -39,10 +36,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: CLIENT_ORIGIN
-        fromService:
-          type: web
-          name: panflute-journey-frontend
-          property: host
+        value: https://panflute-journey-frontend.onrender.com
       # Supabase PostgreSQL database
       - key: DATABASE_URL
         sync: false
