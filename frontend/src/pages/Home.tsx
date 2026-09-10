@@ -77,11 +77,19 @@ export function Home() {
                   <span className="accent-gold">{currentAlbum.title}</span>
                 </h1>
 
-                {/* Album Description */}
-                <p className="hero__subtitle" title={currentAlbum.description || undefined}>
-                  {currentAlbum.description ||
-                    "Traditional Andean panflute melodies recorded in natural acoustic stereo ambience. Bamboo flutes whispering with the mountain breeze."}
-                </p>
+                {/* Album Description Stack - sized to longest description, never truncated */}
+                <div className="hero__subtitle-stack">
+                  {albums.map((alb, idx) => (
+                    <p
+                      key={alb.id}
+                      className={`hero__subtitle hero__subtitle-item ${idx === activeIndex ? "is-active" : ""}`}
+                      aria-hidden={idx !== activeIndex}
+                    >
+                      {alb.description ||
+                        "Traditional Andean panflute melodies recorded in natural acoustic stereo ambience. Bamboo flutes whispering with the mountain breeze."}
+                    </p>
+                  ))}
+                </div>
 
                 {/* Badges */}
                 <div className="hero__badges">
