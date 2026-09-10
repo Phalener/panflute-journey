@@ -7,6 +7,7 @@ import { migrate } from "./db";
 import { authRouter } from "./routes/auth";
 import { albumsRouter, tracksRouter } from "./routes/albums";
 import { adminRouter } from "./routes/admin";
+import { statsRouter } from "./routes/stats";
 import { requireAuth } from "./middleware/auth";
 
 if (!fs.existsSync(env.uploadsDir)) {
@@ -65,6 +66,7 @@ app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
 app.use("/api/auth", authRouter);
 app.use("/api/albums", albumsRouter);
 app.use("/api/tracks", tracksRouter);
+app.use("/api/stats", statsRouter);
 app.use("/api/admin", requireAuth, adminRouter);
 
 // 404 for unknown API routes

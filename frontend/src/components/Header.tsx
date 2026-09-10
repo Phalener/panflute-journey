@@ -1,5 +1,6 @@
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { VisitorCounter } from "./VisitorCounter";
 
 export function Header() {
   const [query, setQuery] = useState("");
@@ -76,6 +77,7 @@ export function Header() {
         </Link>
 
         <nav className="site-nav">
+          <VisitorCounter />
           <a href="/#albums" className="nav-tab">
             <span className="nav-tab__icon">💿</span> Discography
           </a>
