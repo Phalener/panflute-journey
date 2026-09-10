@@ -17,7 +17,19 @@ const app = express();
 
 app.use(
   cors({
-    origin: env.clientOrigin,
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+      if (!origin) return callback(null, true);
+      if (
+        origin.includes("localhost") ||
+        origin.endsWith(".onrender.com") ||
+        origin === env.clientOrigin ||
+        (env.clientOrigin && origin.includes(env.clientOrigin))
+      ) {
+        return callback(null, true);
+      }
+      return callback(null, true);
+    },
+    credentials: true,
   })
 );
 app.use(express.json());
