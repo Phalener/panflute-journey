@@ -1,9 +1,11 @@
-const rawBase = (import.meta.env.VITE_API_URL ?? "").trim();
-const API_BASE = rawBase
-  ? rawBase.startsWith("http://") || rawBase.startsWith("https://")
-    ? rawBase.replace(/\/$/, "")
-    : `https://${rawBase.replace(/\/$/, "")}`
-  : "";
+let rawBase = (import.meta.env.VITE_API_URL ?? "").trim();
+if (rawBase && !rawBase.includes(".") && !rawBase.includes("localhost")) {
+  rawBase = `https://${rawBase}.onrender.com`;
+} else if (rawBase && !rawBase.startsWith("http://") && !rawBase.startsWith("https://")) {
+  rawBase = `https://${rawBase}`;
+}
+const API_BASE = rawBase ? rawBase.replace(/\/$/, "") : "";
+
 
 function authHeaders(): Record<string, string> {
   const token = localStorage.getItem("pf_token");
