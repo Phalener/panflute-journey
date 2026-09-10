@@ -1,5 +1,6 @@
 import path from "path";
 import { Router } from "express";
+import * as mm from "music-metadata";
 import { db } from "../db";
 import { albumDir, upload } from "../middleware/upload";
 import { serializeAlbum, serializeTrack, fixUtf8Encoding } from "../serializers";
@@ -277,11 +278,21 @@ adminRouter.post(
           .replace(/[-_]+/g, " ")
           .trim();
 
+        let durationSeconds: number | null = null;
+        try {
+          const meta = await mm.parseFile(file.path);
+          if (meta?.format?.duration && !isNaN(meta.format.duration)) {
+            durationSeconds = Math.round(meta.format.duration);
+          }
+        } catch (err) {
+          console.warn("Could not calculate duration for file:", file.filename, err);
+        }
+
         await uploadToStorage(file, "songs", album.id);
 
         const info = await db.execute(
-          "INSERT INTO tracks (album_id, title, filename, position) VALUES (?, ?, ?, ?)",
-          [album.id, niceTitle || cleanName, file.filename, nextPosition]
+          "INSERT INTO tracks (album_id, title, filename, duration_seconds, position) VALUES (?, ?, ?, ?, ?)",
+          [album.id, niceTitle || cleanName, file.filename, durationSeconds, nextPosition]
         );
         nextPosition += 1;
 
@@ -299,7 +310,7 @@ adminRouter.post(
   }
 );
 
-// PUT /api/admin/tracks/:id - rename a track
+// PUT /api/admin/tracks/:id - rename a track or update duration
 adminRouter.put("/tracks/:id", async (req, res, next) => {
   try {
     const existing = await db.queryOne<TrackRow>(
@@ -309,15 +320,13 @@ adminRouter.put("/tracks/:id", async (req, res, next) => {
 
     if (!existing) return res.status(404).json({ error: "Track not found." });
 
-    const { title } = req.body as { title?: string };
-    if (!title || !title.trim()) {
-      return res.status(400).json({ error: "Track title cannot be empty." });
-    }
+    const { title, durationSeconds } = req.body as { title?: string; durationSeconds?: number };
+    const cleanTitle = title && title.trim() ? fixUtf8Encoding(title.trim()) : existing.title;
+    const durSec = typeof durationSeconds === "number" && !isNaN(durationSeconds) ? Math.round(durationSeconds) : existing.duration_seconds;
 
-    const cleanTitle = fixUtf8Encoding(title.trim());
-
-    await db.execute("UPDATE tracks SET title = ? WHERE id = ?", [
+    await db.execute("UPDATE tracks SET title = ?, duration_seconds = ? WHERE id = ?", [
       cleanTitle,
+      durSec,
       existing.id,
     ]);
 
@@ -386,11 +395,22 @@ adminRouter.post(
 
       if (!req.file) return res.status(400).json({ error: "No MP3 file received." });
 
+      let durationSeconds: number | null = null;
+      try {
+        const meta = await mm.parseFile(req.file.path);
+        if (meta?.format?.duration && !isNaN(meta.format.duration)) {
+          durationSeconds = Math.round(meta.format.duration);
+        }
+      } catch (err) {
+        console.warn("Could not calculate duration on replace:", req.file.filename, err);
+      }
+
       await deleteFromStorage("songs", existing.album_id, existing.filename);
       await uploadToStorage(req.file, "songs", existing.album_id);
 
-      await db.execute("UPDATE tracks SET filename = ? WHERE id = ?", [
+      await db.execute("UPDATE tracks SET filename = ?, duration_seconds = COALESCE(?, duration_seconds) WHERE id = ?", [
         req.file.filename,
+        durationSeconds,
         existing.id,
       ]);
 
