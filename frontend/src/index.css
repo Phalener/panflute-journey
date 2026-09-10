@@ -495,13 +495,53 @@ img {
   color: #E8D8C3;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
   margin-bottom: 22px;
-  height: 5em;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+/* Stack: rows automatically expand to the longest album description */
+.hero__subtitle-stack {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  margin-bottom: 22px;
+}
+
+.hero__subtitle-item {
+  grid-area: 1 / 1 / 2 / 2;
+  margin-bottom: 0;
+  white-space: pre-line;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease-in-out;
+  max-height: 180px;
+  overflow-y: auto;
+  padding-right: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold-deep) rgba(0, 0, 0, 0.3);
+}
+
+.hero__subtitle-item.is-active {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.hero__subtitle-item::-webkit-scrollbar {
+  width: 5px;
+}
+
+.hero__subtitle-item::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 3px;
+}
+
+.hero__subtitle-item::-webkit-scrollbar-thumb {
+  background: var(--gold-deep);
+  border-radius: 3px;
+}
+
+.hero__subtitle-item::-webkit-scrollbar-thumb:hover {
+  background: var(--gold);
 }
 
 .hero__badges {
