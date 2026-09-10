@@ -43,13 +43,6 @@ export function AlbumCard({ album }: { album: Album }) {
           {/* Glossy specular glass reflection */}
           <div className="jewel-case__gloss" aria-hidden="true" />
 
-          {/* Compact Disc Digital Audio emblem */}
-          <div className="jewel-case__cd-badge" aria-hidden="true">
-            <span className="cd-badge__text">COMPACT</span>
-            <span className="cd-badge__disc">disc</span>
-            <span className="cd-badge__sub">DIGITAL AUDIO</span>
-          </div>
-
           {/* Play button */}
           {album.tracks && album.tracks.length > 0 && (
             <button
