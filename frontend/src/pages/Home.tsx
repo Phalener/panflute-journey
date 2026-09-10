@@ -78,7 +78,7 @@ export function Home() {
                 </h1>
 
                 {/* Album Description */}
-                <p className="hero__subtitle">
+                <p className="hero__subtitle" title={currentAlbum.description || undefined}>
                   {currentAlbum.description ||
                     "Traditional Andean panflute melodies recorded in natural acoustic stereo ambience. Bamboo flutes whispering with the mountain breeze."}
                 </p>
