@@ -127,6 +127,16 @@ export function AdminAlbumEdit() {
     );
   }
 
+  async function handleSaveLyrics(track: Track, lyrics: string | null) {
+    if (!album) return;
+    const data = await api.put<{ track: Track }>(`/api/admin/tracks/${track.id}`, { lyrics });
+    setAlbum((prev) =>
+      prev
+        ? { ...prev, tracks: prev.tracks?.map((t) => (t.id === track.id ? data.track : t)) }
+        : prev
+    );
+  }
+
   async function handleDeleteTrack(track: Track) {
     if (!album) return;
     if (!confirm(`Remove “${track.title}” from this album?`)) return;
@@ -192,9 +202,10 @@ export function AdminAlbumEdit() {
           </label>
           <input
             id="cover-input"
-            ref={coverInputRef}
             type="file"
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/png,image/jpeg,image/webp"
+            style={{ display: "none" }}
+            ref={coverInputRef}
             onChange={handleCoverSelected}
           />
           {album.coverUrl && (
@@ -238,7 +249,7 @@ export function AdminAlbumEdit() {
               checked={isFeatured}
               onChange={(e) => setIsFeatured(e.target.checked)}
             />
-            <label htmlFor="featured">Feature this album on the homepage hero</label>
+            <label htmlFor="featured">Featured on homepage</label>
           </div>
 
           <button className="btn btn--primary" type="submit" disabled={saving}>
@@ -293,6 +304,7 @@ export function AdminAlbumEdit() {
               total={album.tracks!.length}
               onMove={moveTrack}
               onRename={handleRenameTrack}
+              onSaveLyrics={handleSaveLyrics}
               onDelete={handleDeleteTrack}
             />
           ))}
@@ -308,6 +320,7 @@ function TrackEditRow({
   total,
   onMove,
   onRename,
+  onSaveLyrics,
   onDelete,
 }: {
   track: Track;
@@ -315,40 +328,128 @@ function TrackEditRow({
   total: number;
   onMove: (index: number, direction: -1 | 1) => void;
   onRename: (track: Track, title: string) => void;
+  onSaveLyrics: (track: Track, lyrics: string | null) => Promise<void>;
   onDelete: (track: Track) => void;
 }) {
   const [value, setValue] = useState(track.title);
+  const [showLyrics, setShowLyrics] = useState(false);
+  const [lyricsText, setLyricsText] = useState(track.lyrics ?? "");
+  const [savingLyrics, setSavingLyrics] = useState(false);
+  const [lyricsSaved, setLyricsSaved] = useState(false);
+
+  useEffect(() => {
+    setValue(track.title);
+    setLyricsText(track.lyrics ?? "");
+  }, [track.title, track.lyrics]);
 
   return (
-    <div className="admin-track-row">
-      <span className="admin-track-row__drag" title="Reorder with the arrows">
-        <DragHandleIcon />
-      </span>
-      <div>
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onBlur={() => onRename(track, value)}
-        />
-        <audio controls src={mediaUrl(track.url)} style={{ height: 30, width: "100%", marginTop: 4 }} />
+    <div className="admin-track-card">
+      <div className="admin-track-row">
+        <span className="admin-track-row__drag" title="Reorder with the arrows">
+          <DragHandleIcon />
+        </span>
+        <div style={{ flex: 1 }}>
+          <input
+            type="text"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onBlur={() => onRename(track, value)}
+          />
+          <audio controls src={mediaUrl(track.url)} style={{ height: 30, width: "100%", marginTop: 4 }} />
+        </div>
+        <div className="admin-track-row__actions">
+          <button
+            type="button"
+            className={`btn btn--small ${track.lyrics ? "btn--gold-glossy" : "btn--metal-glossy"}`}
+            style={{ padding: "4px 10px", fontSize: "0.76rem" }}
+            onClick={() => setShowLyrics(!showLyrics)}
+            title={track.lyrics ? "Edit lyrics" : "Add lyrics"}
+          >
+            📜 {track.lyrics ? "Edit Lyrics" : "+ Add Lyrics"}
+          </button>
+          <button className="icon-btn" disabled={index === 0} onClick={() => onMove(index, -1)} aria-label="Move up">
+            ↑
+          </button>
+          <button
+            className="icon-btn"
+            disabled={index === total - 1}
+            onClick={() => onMove(index, 1)}
+            aria-label="Move down"
+          >
+            ↓
+          </button>
+          <button className="icon-btn icon-btn--danger" onClick={() => onDelete(track)} aria-label="Delete track">
+            <TrashIcon />
+          </button>
+        </div>
       </div>
-      <div className="admin-track-row__actions">
-        <button className="icon-btn" disabled={index === 0} onClick={() => onMove(index, -1)} aria-label="Move up">
-          ↑
-        </button>
-        <button
-          className="icon-btn"
-          disabled={index === total - 1}
-          onClick={() => onMove(index, 1)}
-          aria-label="Move down"
-        >
-          ↓
-        </button>
-        <button className="icon-btn icon-btn--danger" onClick={() => onDelete(track)} aria-label="Delete track">
-          <TrashIcon />
-        </button>
-      </div>
+
+      {showLyrics && (
+        <div className="admin-track-lyrics-box">
+          <div className="admin-track-lyrics-header">
+            <span style={{ fontWeight: 600, fontSize: "0.82rem" }}>
+              Song Lyrics / Testo per: <em>{track.title}</em>
+            </span>
+            <span style={{ fontSize: "0.76rem", color: "var(--ink-faint)" }}>
+              {lyricsText.split("\n").filter((l) => l.trim()).length} lines
+            </span>
+          </div>
+          <textarea
+            className="admin-lyrics-textarea"
+            placeholder="Type or paste the song lyrics here..."
+            rows={7}
+            value={lyricsText}
+            onChange={(e) => setLyricsText(e.target.value)}
+          />
+          <div className="admin-track-lyrics-actions">
+            {track.lyrics && (
+              <button
+                type="button"
+                className="btn btn--danger btn--small"
+                disabled={savingLyrics}
+                onClick={async () => {
+                  if (confirm("Remove lyrics for this track?")) {
+                    setSavingLyrics(true);
+                    try {
+                      setLyricsText("");
+                      await onSaveLyrics(track, null);
+                      setShowLyrics(false);
+                    } finally {
+                      setSavingLyrics(false);
+                    }
+                  }
+                }}
+              >
+                Remove Lyrics
+              </button>
+            )}
+            <button
+              type="button"
+              className="btn btn--small btn--primary"
+              disabled={savingLyrics}
+              onClick={async () => {
+                setSavingLyrics(true);
+                try {
+                  await onSaveLyrics(track, lyricsText.trim() || null);
+                  setLyricsSaved(true);
+                  setTimeout(() => setLyricsSaved(false), 2000);
+                } finally {
+                  setSavingLyrics(false);
+                }
+              }}
+            >
+              {savingLyrics ? "Saving…" : lyricsSaved ? "✓ Saved!" : "Save Lyrics"}
+            </button>
+            <button
+              type="button"
+              className="btn btn--small btn--ghost"
+              onClick={() => setShowLyrics(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

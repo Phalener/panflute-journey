@@ -4,6 +4,7 @@ export interface Track {
   title: string;
   url: string;
   durationSeconds: number | null;
+  lyrics?: string | null;
   position: number;
 }
 

@@ -320,13 +320,21 @@ adminRouter.put("/tracks/:id", async (req, res, next) => {
 
     if (!existing) return res.status(404).json({ error: "Track not found." });
 
-    const { title, durationSeconds } = req.body as { title?: string; durationSeconds?: number };
+    const { title, durationSeconds, lyrics } = req.body as {
+      title?: string;
+      durationSeconds?: number;
+      lyrics?: string | null;
+    };
     const cleanTitle = title && title.trim() ? fixUtf8Encoding(title.trim()) : existing.title;
     const durSec = typeof durationSeconds === "number" && !isNaN(durationSeconds) ? Math.round(durationSeconds) : existing.duration_seconds;
+    const cleanLyrics = lyrics !== undefined
+      ? (typeof lyrics === "string" && lyrics.trim() ? fixUtf8Encoding(lyrics.trim()) : null)
+      : (existing.lyrics ?? null);
 
-    await db.execute("UPDATE tracks SET title = ?, duration_seconds = ? WHERE id = ?", [
+    await db.execute("UPDATE tracks SET title = ?, duration_seconds = ?, lyrics = ? WHERE id = ?", [
       cleanTitle,
       durSec,
+      cleanLyrics,
       existing.id,
     ]);
 

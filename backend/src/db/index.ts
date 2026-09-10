@@ -100,9 +100,12 @@ export async function migrate(): Promise<void> {
         title TEXT NOT NULL,
         filename TEXT NOT NULL,
         duration_seconds REAL,
+        lyrics TEXT,
         position INTEGER NOT NULL DEFAULT 0,
         created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
+
+      ALTER TABLE tracks ADD COLUMN IF NOT EXISTS lyrics TEXT;
 
       CREATE TABLE IF NOT EXISTS settings (
         key TEXT PRIMARY KEY,
@@ -139,6 +142,7 @@ export async function migrate(): Promise<void> {
         title TEXT NOT NULL,
         filename TEXT NOT NULL,
         duration_seconds REAL,
+        lyrics TEXT,
         position INTEGER NOT NULL DEFAULT 0,
         created_at TEXT NOT NULL DEFAULT (datetime('now'))
       );
@@ -150,6 +154,11 @@ export async function migrate(): Promise<void> {
 
       CREATE INDEX IF NOT EXISTS idx_tracks_album_id ON tracks(album_id);
     `);
+    try {
+      sqliteDb.exec("ALTER TABLE tracks ADD COLUMN lyrics TEXT;");
+    } catch {
+      // Column already exists
+    }
     console.log("SQLite database ready.");
   }
 }

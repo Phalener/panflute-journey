@@ -33,6 +33,7 @@ export function serializeTrack(t: TrackRow) {
     title: fixUtf8Encoding(t.title),
     url: getStorageUrl("songs", t.album_id, t.filename),
     durationSeconds: t.duration_seconds,
+    lyrics: t.lyrics ? fixUtf8Encoding(t.lyrics) : null,
     position: t.position,
   };
 }

@@ -23,6 +23,7 @@ export interface TrackRow {
   title: string;
   filename: string;
   duration_seconds: number | null;
+  lyrics?: string | null;
   position: number;
   created_at: string;
 }

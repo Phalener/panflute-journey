@@ -220,6 +220,7 @@ function TrackRowItem({
   onDurationLoaded: (trackId: number, duration: number) => void;
 }) {
   const [duration, setDuration] = useState<number | null>(track.durationSeconds ?? null);
+  const [showLyrics, setShowLyrics] = useState(false);
 
   useEffect(() => {
     if (track.durationSeconds && track.durationSeconds > 0) {
@@ -268,10 +269,46 @@ function TrackRowItem({
           )}
         </span>
         <span className="track-row__leader" aria-hidden="true" />
+
+        {track.lyrics && (
+          <span
+            className={`track-row__lyrics-pill ${showLyrics ? "is-active" : ""}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowLyrics(!showLyrics);
+            }}
+            title={showLyrics ? "Hide lyrics" : "Show lyrics"}
+            role="button"
+            tabIndex={0}
+          >
+            📜 Lyrics
+          </span>
+        )}
+
         <span className="track-row__duration">
           {formatDuration(duration)}
         </span>
       </button>
+
+      {showLyrics && track.lyrics && (
+        <div className="track-row__lyrics-drawer" onClick={(e) => e.stopPropagation()}>
+          <div className="lyrics-drawer__header">
+            <span className="lyrics-drawer__title">
+              📜 <em>{track.title}</em> — Lyrics
+            </span>
+            <button
+              type="button"
+              className="lyrics-drawer__close"
+              onClick={() => setShowLyrics(false)}
+            >
+              ✕ Close
+            </button>
+          </div>
+          <div className="lyrics-drawer__body">
+            <pre className="lyrics-pre">{track.lyrics}</pre>
+          </div>
+        </div>
+      )}
     </li>
   );
 }

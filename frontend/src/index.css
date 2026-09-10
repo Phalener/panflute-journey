@@ -2012,3 +2012,281 @@ img {
     transition: none !important;
   }
 }
+
+/* ---------------------------------------------------------
+   SONG LYRICS (Testi Canzoni) - Styles for Admin, Album, & Winamp
+--------------------------------------------------------- */
+
+/* 1. Admin Lyrics Editor */
+.admin-track-card {
+  background: var(--bg-card, #1A1423);
+  border: 1px solid rgba(245, 196, 83, 0.15);
+  border-radius: 6px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.admin-track-card:hover {
+  border-color: rgba(245, 196, 83, 0.35);
+}
+
+.admin-track-lyrics-box {
+  background: rgba(10, 8, 14, 0.85);
+  border-top: 1px dashed rgba(245, 196, 83, 0.25);
+  padding: 14px 18px;
+}
+
+.admin-track-lyrics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.admin-lyrics-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: #0E0B13;
+  color: #F0EDE6;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.admin-lyrics-textarea:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(245, 196, 83, 0.25);
+}
+
+.admin-track-lyrics-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* 2. Public Album Tracklist Lyrics Drawer */
+.track-row__lyrics-pill {
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 3px;
+  background: rgba(245, 196, 83, 0.12);
+  border: 1px solid rgba(245, 196, 83, 0.3);
+  color: var(--gold);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  user-select: none;
+}
+
+.track-row__lyrics-pill:hover,
+.track-row__lyrics-pill.is-active {
+  background: var(--gold);
+  color: #120A03;
+  border-color: #FFE699;
+  box-shadow: 0 0 8px rgba(245, 196, 83, 0.4);
+}
+
+.track-row__lyrics-drawer {
+  background: linear-gradient(180deg, rgba(20, 15, 27, 0.95) 0%, rgba(12, 9, 17, 0.98) 100%);
+  border: 1px solid var(--gold-deep);
+  border-left: 3px solid var(--gold);
+  border-radius: 4px;
+  margin: 4px 14px 14px 38px;
+  padding: 16px 20px;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8), 0 4px 16px rgba(0, 0, 0, 0.5);
+  animation: drawerFadeIn 0.2s ease-out;
+}
+
+@keyframes drawerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.lyrics-drawer__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(245, 196, 83, 0.2);
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.lyrics-drawer__title {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.05em;
+}
+
+.lyrics-drawer__close {
+  all: unset;
+  cursor: pointer;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 2px 8px;
+  border-radius: 2px;
+  transition: all 0.15s ease;
+}
+
+.lyrics-drawer__close:hover {
+  color: #FFF;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.lyrics-drawer__body {
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.lyrics-pre {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: #E6E1D8;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* 3. Winamp Docked Lyrics Window */
+.winamp-lyrics-btn {
+  all: unset;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #3A4250 0%, #1E232C 100%);
+  color: var(--winamp-green);
+  border: 1px solid #525B6C;
+  margin-left: 10px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 4px rgba(0, 0, 0, 0.6);
+  transition: all 0.15s ease;
+}
+
+.winamp-lyrics-btn:hover {
+  background: linear-gradient(180deg, #4B5566 0%, #2A313E 100%);
+  color: #55FFAA;
+  border-color: var(--winamp-green);
+}
+
+.winamp-lyrics-btn.is-active {
+  background: linear-gradient(180deg, #062817 0%, #001A0E 100%);
+  color: #00FF7F;
+  border-color: #00FF7F;
+  box-shadow: inset 0 0 6px rgba(0, 255, 127, 0.4), 0 0 8px rgba(0, 255, 127, 0.3);
+}
+
+.winamp-lyrics-dock {
+  position: absolute;
+  bottom: 100%;
+  right: 20px;
+  width: 380px;
+  max-width: calc(100vw - 40px);
+  max-height: 400px;
+  background: #0D1017;
+  border: 2px solid #5A6578;
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  animation: dockSlideUp 0.22s ease-out;
+}
+
+@keyframes dockSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.winamp-lyrics-dock__header {
+  background: linear-gradient(180deg, #3D4554 0%, #252B35 100%);
+  border-bottom: 1px solid #1A1F26;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 4px 4px 0 0;
+}
+
+.winamp-lyrics-dock__title {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--winamp-green);
+  text-shadow: 0 0 6px rgba(0, 255, 127, 0.5);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+}
+
+.winamp-lyrics-dock__close {
+  all: unset;
+  cursor: pointer;
+  color: #CCC;
+  font-weight: 800;
+  font-size: 0.76rem;
+  padding: 0 4px;
+  line-height: 1;
+  transition: color 0.15s ease;
+}
+
+.winamp-lyrics-dock__close:hover {
+  color: #FF5555;
+}
+
+.winamp-lyrics-dock__body {
+  padding: 14px 16px;
+  overflow-y: auto;
+  flex: 1;
+  background: radial-gradient(circle at top left, #121722 0%, #080A0F 100%);
+}
+
+.winamp-lyrics-dock__text {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.84rem;
+  line-height: 1.65;
+  color: #D4FFEB;
+  text-shadow: 0 0 2px rgba(0, 255, 127, 0.25);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.winamp-lyrics-dock__empty {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-faint);
+  text-align: center;
+  margin: 30px 0;
+}
+

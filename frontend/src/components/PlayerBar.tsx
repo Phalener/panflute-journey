@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { usePlayer } from "../context/PlayerContext";
 import { mediaUrl } from "../services/api";
@@ -25,6 +26,8 @@ export function PlayerBar() {
     setVolume,
   } = usePlayer();
 
+  const [showLyricsWindow, setShowLyricsWindow] = useState(false);
+
   if (!currentTrack) return null;
 
   const coverSrc = currentAlbum?.coverUrl
@@ -33,6 +36,32 @@ export function PlayerBar() {
 
   return (
     <div className="player-bar winamp-player" role="region" aria-label="Music player">
+      {/* Winamp Docked Lyrics Window */}
+      {showLyricsWindow && (
+        <div className="winamp-lyrics-dock" role="dialog" aria-label="Lyrics window">
+          <div className="winamp-lyrics-dock__header">
+            <span className="winamp-lyrics-dock__title">
+              ♫ WINAMP LYRICS • {currentTrack.title}
+            </span>
+            <button
+              type="button"
+              className="winamp-lyrics-dock__close"
+              onClick={() => setShowLyricsWindow(false)}
+              aria-label="Close lyrics"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="winamp-lyrics-dock__body">
+            {currentTrack.lyrics ? (
+              <pre className="winamp-lyrics-dock__text">{currentTrack.lyrics}</pre>
+            ) : (
+              <p className="winamp-lyrics-dock__empty">No lyrics recorded for this song.</p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Decorative top screw / rivet bar */}
       <div className="winamp-player__screws" aria-hidden="true">
         <span className="winamp-screw" />
@@ -151,6 +180,17 @@ export function PlayerBar() {
             title={`Volume: ${Math.round(volume * 100)}%`}
           />
           <span className="winamp-vol-text">{Math.round(volume * 100)}%</span>
+
+          {currentTrack.lyrics && (
+            <button
+              type="button"
+              className={`winamp-lyrics-btn ${showLyricsWindow ? "is-active" : ""}`}
+              onClick={() => setShowLyricsWindow(!showLyricsWindow)}
+              title={showLyricsWindow ? "Hide lyrics" : "Show lyrics"}
+            >
+              📜 LYRICS
+            </button>
+          )}
         </div>
       </div>
     </div>
