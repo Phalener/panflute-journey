@@ -1,0 +1,60 @@
+services:
+  # -------------------------------------------------------------
+  # 1. Frontend: Static Site (Gratuito su Render, sempre attivo)
+  # -------------------------------------------------------------
+  - type: web
+    name: panflute-journey-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      # Rewrite SPA per React Router (evita 404 su /admin/login o /albums/:id)
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: panflute-journey-backend
+          property: host
+
+  # -------------------------------------------------------------
+  # 2. Backend: Node.js API Web Service
+  # -------------------------------------------------------------
+  - type: web
+    name: panflute-journey-backend
+    runtime: node
+    rootDir: backend
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CLIENT_ORIGIN
+        fromService:
+          type: web
+          name: panflute-journey-frontend
+          property: host
+      # Supabase PostgreSQL database
+      - key: DATABASE_URL
+        sync: false
+      # Cloudflare R2 Object Storage (per audio MP3 e copertine persistenti)
+      - key: R2_ENDPOINT
+        value: https://05008cf417f72618eb63c35e10116862.r2.cloudflarestorage.com
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET_NAME
+        value: panflute-journey
+      - key: R2_PUBLIC_URL
+        sync: false
+
