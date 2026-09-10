@@ -2,14 +2,14 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { usePlayer } from "../context/PlayerContext";
 import { api, mediaUrl } from "../services/api";
-import { Album } from "../types";
+import { Album, Track } from "../types";
 import { PauseIcon, PlayIcon } from "../components/icons";
 
 function formatDuration(seconds: number | null): string {
-  if (!seconds) return "--:--";
+  if (!seconds || seconds <= 0) return "--:--";
   const m = Math.floor(seconds / 60);
   const s = Math.floor(seconds % 60);
-  return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
 function formatTotalDuration(totalSeconds: number): string {
@@ -22,6 +22,7 @@ export function AlbumPage() {
   const [album, setAlbum] = useState<Album | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [durations, setDurations] = useState<Record<number, number>>({});
   const { currentTrack, isPlaying, playAlbumFrom, togglePlay } = usePlayer();
 
   useEffect(() => {
@@ -34,12 +35,16 @@ export function AlbumPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  const handleDurationLoaded = (trackId: number, sec: number) => {
+    setDurations((prev) => (prev[trackId] === sec ? prev : { ...prev, [trackId]: sec }));
+  };
+
   if (loading) {
     return (
       <div className="container">
         <div className="loading-state retro-panel">
           <div className="retro-spinner"></div>
-          <p>LOADING COMPACT DISC DATA… PLEASE WAIT</p>
+          <p>Loading album… please wait</p>
         </div>
       </div>
     );
@@ -49,10 +54,10 @@ export function AlbumPage() {
     return (
       <div className="container">
         <div className="error-state retro-panel">
-          <h3>DISC ERROR</h3>
-          <p>{error ?? "Compact disc could not be found."}</p>
+          <h3>Album Error</h3>
+          <p>{error ?? "Album could not be found."}</p>
           <Link to="/" className="btn btn--gold-glossy" style={{ marginTop: "18px", display: "inline-block" }}>
-            ← Return to CD Catalog
+            ← Return to Discography
           </Link>
         </div>
       </div>
@@ -60,10 +65,13 @@ export function AlbumPage() {
   }
 
   const tracks = album.tracks ?? [];
-  const totalDuration = tracks.reduce((sum, t) => sum + (t.durationSeconds ?? 0), 0);
+  const totalDuration = tracks.reduce(
+    (sum, t) => sum + (durations[t.id] ?? t.durationSeconds ?? 0),
+    0
+  );
   const coverSrc = album.coverUrl ? mediaUrl(album.coverUrl) : "/assets/panflute-cd-sample.jpg";
 
-  function handleTrackClick(track: (typeof tracks)[number]) {
+  function handleTrackClick(track: Track) {
     if (currentTrack?.id === track.id) {
       togglePlay();
     } else {
@@ -78,7 +86,7 @@ export function AlbumPage() {
     <div className="container">
       {/* Breadcrumb navigation */}
       <div className="retro-breadcrumb">
-        <Link to="/">🏠 CD CATALOG</Link>
+        <Link to="/">Discography</Link>
         <span>&gt;</span>
         <span className="retro-breadcrumb__current">{album.title}</span>
       </div>
@@ -103,25 +111,14 @@ export function AlbumPage() {
                   }}
                 />
                 <div className="jewel-case__gloss"></div>
-                <div className="jewel-case__cd-badge">
-                  <span className="cd-badge__text">COMPACT</span>
-                  <span className="cd-badge__disc">disc</span>
-                  <span className="cd-badge__sub">DIGITAL AUDIO</span>
-                </div>
               </div>
-            </div>
-
-            <div className="cd-audio-specs" aria-hidden="true">
-              <span>● HI-FI STEREO</span>
-              <span>● 44.1 kHz / 16-BIT</span>
-              <span>● MASTER RECORDING</span>
             </div>
           </div>
 
           <div className="album-hero__info">
             <div className="retro-stamp">
-              <span className="retro-stamp__badge">OFFICIAL RELEASE</span>
-              <span className="retro-stamp__text">TRADITIONAL ANDEAN PANPIPES</span>
+              <span className="retro-stamp__badge">ALBUM</span>
+              <span className="retro-stamp__text">{album.year ? `${album.year}` : "RELEASE"}</span>
             </div>
 
             <h1 className="album-hero__title">{album.title}</h1>
@@ -137,7 +134,9 @@ export function AlbumPage() {
               </div>
               <div className="spec-card">
                 <span className="spec-label">RUNNING TIME</span>
-                <span className="spec-value">{totalDuration > 0 ? formatTotalDuration(totalDuration) : "FULL LENGTH"}</span>
+                <span className="spec-value">
+                  {totalDuration > 0 ? formatTotalDuration(totalDuration) : "FULL LENGTH"}
+                </span>
               </div>
               <div className="spec-card">
                 <span className="spec-label">RELEASE YEAR</span>
@@ -157,11 +156,11 @@ export function AlbumPage() {
                 >
                   {isCurrentAlbumPlaying ? (
                     <>
-                      <PauseIcon size={16} /> ❚❚ Pause Disc
+                      <PauseIcon size={16} /> ❚❚ Pause Album
                     </>
                   ) : (
                     <>
-                      <PlayIcon size={16} /> ▶ Play Full CD
+                      <PlayIcon size={16} /> ▶ Play Full Album
                     </>
                   )}
                 </button>
@@ -170,11 +169,13 @@ export function AlbumPage() {
           </div>
         </div>
 
-        {/* CD Inlay Tray / Tracklist */}
+        {/* Tracklist Box */}
         <div className="cd-inlay-tray">
           <div className="cd-inlay-tray__header">
-            <h3>✦ COMPACT DISC TRACK INDEX ✦</h3>
-            <span className="cd-inlay-tray__subtitle">ORIGINAL ANDEAN RECORDINGS</span>
+            <h3>Tracklist</h3>
+            <span className="cd-inlay-tray__subtitle">
+              {tracks.length} {tracks.length === 1 ? "track" : "tracks"}
+            </span>
           </div>
 
           {tracks.length === 0 ? (
@@ -184,44 +185,93 @@ export function AlbumPage() {
               {tracks.map((track, index) => {
                 const isActive = currentTrack?.id === track.id;
                 return (
-                  <li
+                  <TrackRowItem
                     key={track.id}
-                    className={`track-row retro-track-row ${isActive ? "is-active" : ""}`}
-                  >
-                    <button
-                      className="track-row__button"
-                      onClick={() => handleTrackClick(track)}
-                      title={`Play ${track.title}`}
-                    >
-                      <span className="track-row__index">
-                        {isActive && isPlaying ? (
-                          <span className="track-row__playing-indicator">►</span>
-                        ) : (
-                          String(index + 1).padStart(2, "0")
-                        )}
-                      </span>
-                      <span className="track-row__title">
-                        {track.title}
-                        {isActive && isPlaying && (
-                          <span className="track-row__now-tag">NOW PLAYING</span>
-                        )}
-                      </span>
-                      <span className="track-row__leader" aria-hidden="true" />
-                      <span className="track-row__duration">
-                        {formatDuration(track.durationSeconds)}
-                      </span>
-                    </button>
-                  </li>
+                    track={track}
+                    index={index}
+                    isActive={isActive}
+                    isPlaying={isPlaying}
+                    onClick={() => handleTrackClick(track)}
+                    onDurationLoaded={handleDurationLoaded}
+                  />
                 );
               })}
             </ol>
           )}
-
-          <div className="cd-inlay-tray__footer">
-            <span>COMPACT DISC DIGITAL AUDIO • ALL RIGHTS OF THE PRODUCER AND OWNER OF THE WORK RESERVED</span>
-          </div>
         </div>
       </div>
     </div>
+  );
+}
+
+function TrackRowItem({
+  track,
+  index,
+  isActive,
+  isPlaying,
+  onClick,
+  onDurationLoaded,
+}: {
+  track: Track;
+  index: number;
+  isActive: boolean;
+  isPlaying: boolean;
+  onClick: () => void;
+  onDurationLoaded: (trackId: number, duration: number) => void;
+}) {
+  const [duration, setDuration] = useState<number | null>(track.durationSeconds ?? null);
+
+  useEffect(() => {
+    if (track.durationSeconds && track.durationSeconds > 0) {
+      setDuration(track.durationSeconds);
+      onDurationLoaded(track.id, track.durationSeconds);
+      return;
+    }
+
+    const audio = new Audio();
+    audio.preload = "metadata";
+    audio.src = mediaUrl(track.url);
+
+    const onLoaded = () => {
+      if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration) && audio.duration > 0) {
+        const sec = Math.round(audio.duration);
+        setDuration(sec);
+        onDurationLoaded(track.id, sec);
+      }
+    };
+
+    audio.addEventListener("loadedmetadata", onLoaded);
+    return () => {
+      audio.removeEventListener("loadedmetadata", onLoaded);
+      audio.src = "";
+    };
+  }, [track.url, track.durationSeconds, track.id]);
+
+  return (
+    <li className={`track-row retro-track-row ${isActive ? "is-active" : ""}`}>
+      <button
+        className="track-row__button"
+        onClick={onClick}
+        title={`Play ${track.title}`}
+      >
+        <span className="track-row__index">
+          {isActive && isPlaying ? (
+            <span className="track-row__playing-indicator">►</span>
+          ) : (
+            String(index + 1).padStart(2, "0")
+          )}
+        </span>
+        <span className="track-row__title">
+          {track.title}
+          {isActive && isPlaying && (
+            <span className="track-row__now-tag">NOW PLAYING</span>
+          )}
+        </span>
+        <span className="track-row__leader" aria-hidden="true" />
+        <span className="track-row__duration">
+          {formatDuration(duration)}
+        </span>
+      </button>
+    </li>
   );
 }
