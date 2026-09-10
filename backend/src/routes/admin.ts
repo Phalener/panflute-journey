@@ -2,7 +2,7 @@ import path from "path";
 import { Router } from "express";
 import { db } from "../db";
 import { albumDir, upload } from "../middleware/upload";
-import { serializeAlbum, serializeTrack } from "../serializers";
+import { serializeAlbum, serializeTrack, fixUtf8Encoding } from "../serializers";
 import { AlbumRow, TrackRow } from "../types";
 import {
   uploadToStorage,
@@ -271,8 +271,9 @@ adminRouter.post(
 
       const inserted: TrackRow[] = [];
       for (const file of files) {
+        const cleanName = fixUtf8Encoding(file.originalname);
         const niceTitle = path
-          .basename(file.originalname, path.extname(file.originalname))
+          .basename(cleanName, path.extname(cleanName))
           .replace(/[-_]+/g, " ")
           .trim();
 
@@ -280,7 +281,7 @@ adminRouter.post(
 
         const info = await db.execute(
           "INSERT INTO tracks (album_id, title, filename, position) VALUES (?, ?, ?, ?)",
-          [album.id, niceTitle || file.originalname, file.filename, nextPosition]
+          [album.id, niceTitle || cleanName, file.filename, nextPosition]
         );
         nextPosition += 1;
 
@@ -313,8 +314,10 @@ adminRouter.put("/tracks/:id", async (req, res, next) => {
       return res.status(400).json({ error: "Track title cannot be empty." });
     }
 
+    const cleanTitle = fixUtf8Encoding(title.trim());
+
     await db.execute("UPDATE tracks SET title = ? WHERE id = ?", [
-      title.trim(),
+      cleanTitle,
       existing.id,
     ]);
 
